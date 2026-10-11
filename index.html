@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Barroccino — anteprima</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&family=Unbounded:wght@300;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #0e0a08;
+    --ink-2: #1a1310;
+    --bone: #f4ecdf;
+    --bone-dim: rgba(244, 236, 223, .62);
+    --line: rgba(244, 236, 223, .14);
+    --rose: #eab4ae;
+    --pist: #b5c784;
+    --coffee: #c8925a;
+    --berry: #e06a6a;
+    --accent: var(--rose);
+    --serif: "Instrument Serif", Georgia, serif;
+    --sans: "Manrope", system-ui, sans-serif;
+    --mono: "Unbounded", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--ink); color: var(--bone); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  body { overflow-x: hidden; }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+  .grain { position: fixed; inset: 0; z-index: 80; pointer-events: none; opacity: .06; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+  /* ---------- Loader ---------- */
+  .loader { position: fixed; inset: 0; z-index: 100; background: var(--ink); display: grid; place-items: center; }
+  .loader-count { font-family: var(--mono); font-weight: 300; font-size: clamp(5rem, 18vw, 16rem); letter-spacing: -.06em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .loader-label { position: absolute; bottom: 32px; left: 32px; right: 32px; display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--bone-dim); }
+  .loader-bar { position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+
+  /* ---------- Header ---------- */
+  .hdr { position: fixed; z-index: 60; top: 20px; left: 24px; right: 24px; display: flex; align-items: center; justify-content: space-between; mix-blend-mode: difference; }
+  .hdr img { width: 132px; filter: brightness(0) invert(1); }
+  .hdr nav { display: flex; gap: 28px; font-size: 11px; letter-spacing: .24em; text-transform: uppercase; }
+  .pill { display: inline-flex; align-items: center; gap: 10px; border: 1px solid currentColor; border-radius: 999px; padding: 10px 18px; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+  /* ---------- Film (pinned stage) ---------- */
+  .film { position: relative; height: 1350vh; }
+  .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+  .glow { position: absolute; inset: -20%; background: radial-gradient(40% 40% at 70% 50%, color-mix(in oklab, var(--accent) 32%, transparent), transparent 70%); transition: background 1.2s; }
+  #film-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .bigword { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; font-family: var(--serif); font-size: 15vw; line-height: .86; letter-spacing: -.04em; color: var(--bone); white-space: nowrap; pointer-events: none; z-index: 4; mix-blend-mode: difference; }
+  .bigword em { color: var(--bone); }
+
+  .stage { color: var(--ink); }
+  .wash { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .9s ease; }
+  .wash.on { opacity: 1; }
+  .w0, .w2 { background: linear-gradient(90deg, rgba(246,239,228,.94) 0%, rgba(246,239,228,.7) 28%, rgba(246,239,228,0) 52%); }
+  .w1 { background: linear-gradient(270deg, rgba(246,239,228,.94) 0%, rgba(246,239,228,.7) 28%, rgba(246,239,228,0) 52%); }
+  .w3 { background: linear-gradient(90deg, rgba(246,239,228,.9) 0%, rgba(246,239,228,0) 40%), linear-gradient(270deg, rgba(246,239,228,.85) 0%, rgba(246,239,228,0) 32%); }
+  .chapter { position: absolute; z-index: 5; max-width: 34vw; }
+  .chapter .kick { display: flex; align-items: center; gap: 12px; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--accent); }
+  .chapter .kick::before { content: ""; width: 34px; height: 1px; background: currentColor; }
+  .chapter h2 { margin-top: 22px; font-family: var(--serif); font-weight: 400; font-size: clamp(3.2rem, 6.4vw, 7.4rem); line-height: .88; letter-spacing: -.035em; }
+  .chapter h2 em { color: var(--accent); }
+  .chapter p { margin-top: 22px; max-width: 30ch; font-size: 15px; line-height: 1.7; color: rgba(14,10,8,.7); }
+  .line { display: block; overflow: hidden; padding: .14em 0 .06em; margin-top: -.14em; }
+  .line > span { display: block; }
+  .num { position: absolute; z-index: 1; font-family: var(--mono); font-weight: 700; font-size: 34vw; line-height: .8; letter-spacing: -.08em; color: transparent; -webkit-text-stroke: 1px var(--line); pointer-events: none; }
+
+  .c1 { left: 4vw; bottom: 12vh; }
+  .c2 { right: 4vw; bottom: 12vh; text-align: right; }
+  .c2 p { margin-left: auto; }
+  .c2 .kick { justify-content: flex-end; }
+  .c3 { left: 4vw; bottom: 10vh; max-width: 44vw; }
+  .c4 { left: 4vw; top: 22vh; max-width: 24vw; }
+  .c4b { position: absolute; right: 4vw; bottom: 14vh; max-width: 22vw; z-index: 5; font-size: 15px; line-height: 1.7; color: rgba(14,10,8,.7); }
+  .c4 h2 { font-size: clamp(3rem, 5.4vw, 6.4rem); }
+
+  .hud { position: absolute; z-index: 10; left: 4vw; right: 4vw; bottom: 28px; display: flex; align-items: center; gap: 18px; font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: rgba(14,10,8,.65); }
+  .hud .track { flex: 1; height: 1px; background: rgba(14,10,8,.15); position: relative; }
+  .hud .fill { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+  .hud .ticks { display: flex; gap: 8px; }
+  .hud .tick { width: 28px; height: 3px; border-radius: 3px; background: rgba(14,10,8,.15); overflow: hidden; }
+  .hud .tick i { display: block; height: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+  .framectr { position: absolute; z-index: 10; right: 4vw; top: 50%; transform: translateY(-50%) rotate(90deg); transform-origin: right center; font-family: var(--mono); font-size: 10px; letter-spacing: .3em; color: rgba(14,10,8,.55); white-space: nowrap; }
+  .scrollhint { position: absolute; z-index: 10; left: 50%; bottom: 70px; transform: translateX(-50%); font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .scrollhint i { width: 1px; height: 42px; background: linear-gradient(var(--ink), transparent); }
+
+  /* ---------- After the film ---------- */
+  section.after { position: relative; z-index: 2; background: var(--bone); color: var(--ink); }
+  .flav { padding: 18vh 0 14vh; border-radius: 48px 48px 0 0; margin-top: -10vh; overflow: hidden; }
+  .flav-head { padding: 0 4vw; display: flex; justify-content: space-between; align-items: end; gap: 40px; }
+  .flav-head h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(3.4rem, 9vw, 10rem); line-height: .85; letter-spacing: -.04em; }
+  .flav-head h3 em { color: #8c2f2b; }
+  .flav-head p { max-width: 34ch; font-size: 15px; line-height: 1.7; color: rgba(14,10,8,.6); }
+  .row { display: flex; width: max-content; margin-top: 6vh; }
+  .row span { font-family: var(--serif); font-size: clamp(3rem, 7vw, 7.5rem); line-height: 1; letter-spacing: -.03em; padding-right: .5em; white-space: nowrap; display: flex; align-items: center; gap: .5em; }
+  .row span:nth-child(even) { font-style: italic; color: transparent; -webkit-text-stroke: 1.2px var(--ink); }
+  .row span::after { content: ""; width: .22em; height: .22em; border-radius: 50%; background: var(--berry); flex-shrink: 0; }
+  .row.r2 span::after { background: var(--pist); }
+
+  .posters { position: relative; z-index: 2; background: var(--ink); height: 100svh; overflow: hidden; display: flex; align-items: center; }
+  .posters-track { display: flex; align-items: center; gap: 2.4vw; padding: 0 4vw; will-change: transform; }
+  .posters-track img { height: 74svh; width: auto; aspect-ratio: 4/5; border-radius: 18px; flex-shrink: 0; box-shadow: 0 40px 80px -40px rgba(0,0,0,.7); }
+  .posters-intro { width: 30vw; flex-shrink: 0; }
+  .posters-intro .kick { font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--rose); }
+  .posters-intro h3 { margin-top: 20px; font-family: var(--serif); font-weight: 400; font-size: clamp(3.4rem, 7vw, 8rem); line-height: .86; letter-spacing: -.04em; }
+  .posters-intro h3 em { color: var(--rose); }
+  .bento { padding: 4vh 4vw 16vh; display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
+  .tile { position: relative; overflow: hidden; border-radius: 28px; background: #e4d8c3; }
+  .tile img { width: 100%; height: 100%; object-fit: cover; }
+  .tile b { position: absolute; left: 22px; bottom: 18px; font-family: var(--serif); font-weight: 400; font-size: clamp(1.8rem, 3vw, 3rem); color: var(--bone); text-shadow: 0 2px 30px rgba(0,0,0,.35); }
+  .t1 { grid-column: span 7; aspect-ratio: 16/11; }
+  .t2 { grid-column: span 5; aspect-ratio: 4/5; grid-row: span 2; }
+  .t3 { grid-column: span 4; aspect-ratio: 1; }
+  .t4 { grid-column: span 3; aspect-ratio: 3/4; }
+  .t5 { grid-column: span 5; aspect-ratio: 16/10; }
+  .t6 { grid-column: span 7; aspect-ratio: 16/9; }
+
+  .places { background: var(--ink); color: var(--bone); padding: 18vh 4vw; }
+  .places .kick { font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--rose); }
+  .place { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 24px; padding: 4vh 0; border-bottom: 1px solid var(--line); }
+  .place h4 { font-family: var(--serif); font-weight: 400; font-size: clamp(3.6rem, 10vw, 11rem); line-height: .85; letter-spacing: -.04em; }
+  .place p { font-size: 14px; line-height: 1.7; color: var(--bone-dim); text-align: right; }
+
+  .final { background: var(--rose); color: var(--ink); padding: 20vh 4vw 6vh; text-align: center; overflow: hidden; }
+  .final h5 { font-family: var(--serif); font-weight: 400; font-size: clamp(4rem, 15vw, 17rem); line-height: .82; letter-spacing: -.05em; }
+  .final h5 em { color: #8c2f2b; }
+  .final .cta { margin-top: 7vh; display: inline-flex; gap: 14px; align-items: center; background: var(--ink); color: var(--bone); border-radius: 999px; padding: 20px 34px; font-size: 12px; letter-spacing: .24em; text-transform: uppercase; }
+  .final footer { margin-top: 18vh; display: flex; justify-content: space-between; font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: rgba(14,10,8,.55); }
+
+  @media (max-width: 820px) {
+    .hdr nav { display: none; }
+    .hdr img { width: 112px; }
+    .chapter, .c3, .c4 { left: 6vw; right: 6vw; max-width: none; top: auto; bottom: 13vh; text-align: left; }
+    .c2 .kick { justify-content: flex-start; }
+    .c2 p { margin-left: 0; }
+    .chapter h2, .c4 h2 { font-size: clamp(2.6rem, 11.5vw, 4rem); margin-top: 14px; }
+    .chapter p { margin-top: 14px; }
+    .chapter, .c3, .c4 { bottom: 10vh; }
+    .chapter p { font-size: 14px; }
+    .c4b { display: none; }
+    .num { font-size: 60vw; }
+    .framectr { display: none; }
+    .bigword { font-size: 21vw; top: 34%; }
+    .w0, .w1, .w2, .w3 { background: linear-gradient(0deg, rgba(246,239,228,.96) 0%, rgba(246,239,228,.88) 34%, rgba(246,239,228,0) 60%); }
+    .flav-head { flex-direction: column; align-items: start; }
+    .bento { grid-template-columns: repeat(2, 1fr); }
+    .bento .tile { grid-column: span 1; grid-row: auto; aspect-ratio: 3/4; }
+    .bento .t1, .bento .t6 { grid-column: span 2; aspect-ratio: 4/3; }
+    .place { grid-template-columns: 1fr; }
+    .posters-intro { width: 78vw; }
+    .posters-track img { height: 62svh; }
+    .place p { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="loader" id="loader">
+  <div class="loader-count" id="count">000</div>
+  <div class="loader-label"><span>Barroccino · Firenze</span><span>L'ora del gelato</span></div>
+  <div class="loader-bar" id="bar"></div>
+</div>
+
+<header class="hdr">
+  <img src="assets/logo.png" alt="Barroccino" />
+  <nav><a href="#gusti">Gusti</a><a href="#film">Affogato</a><a href="#luoghi">Negozi</a></nav>
+  <a class="pill" href="#luoghi"><span class="dot"></span>Ordina</a>
+</header>
+
+<main>
+  <section class="film" id="film">
+    <div class="stage">
+      <div class="glow" id="glow"></div>
+      <div class="bigword" id="bigword"><span class="line"><span>L'ora</span></span><span class="line"><span><em>del gelato</em></span></span></div>
+      <div class="num" id="num" style="display:none">01</div>
+      <canvas id="film-canvas" aria-label="Il gelato Barroccino: dal carretto alla coppetta, l'affogato, il cono di stagione"></canvas>
+
+      <div class="wash w0"></div><div class="wash w1"></div><div class="wash w2"></div><div class="wash w3"></div>
+      <div class="chapter c1" data-ch="0">
+        <div class="kick">01 — L'ora del gelato</div>
+        <h2><span class="line"><span>Il tempo,</span></span><span class="line"><span><em>al gusto</em></span></span><span class="line"><span>di Firenze.</span></span></h2>
+        <p>Ispirato ai carretti toscani del gelato. Un luogo dove fermarsi, e prendersi il proprio tempo.</p>
+      </div>
+      <div class="chapter c2" data-ch="1">
+        <div class="kick">02 — Il laboratorio</div>
+        <h2><span class="line"><span>Mantecato</span></span><span class="line"><span><em>ogni giorno.</em></span></span></h2>
+        <p>Ingredienti di stagione, scelti da piccoli produttori locali. Per questo i gusti cambiano ogni giorno.</p>
+      </div>
+      <div class="chapter c3" data-ch="2">
+        <div class="kick">03 — L'affogato</div>
+        <h2><span class="line"><span>Fiordilatte</span></span><span class="line"><span><em>&amp; espresso.</em></span></span></h2>
+        <p>Due gesti semplici, il tempo giusto per incontrarsi.</p>
+      </div>
+      <div class="chapter c4" data-ch="3">
+        <div class="kick">04 — La stagione</div>
+        <h2><span class="line"><span>La stagione</span></span><span class="line"><span><em>nel cono.</em></span></span></h2>
+      </div>
+      <p class="c4b chapter-side" data-ch="3">Frutta, frutta secca e materie prime selezionate seguono il ritmo naturale delle stagioni.</p>
+
+      <div class="scrollhint" id="hint">Scorri<i></i></div>
+      <div class="framectr" id="framectr">FRAME 001 / 192</div>
+      <div class="hud">
+        <span id="hudnum">01 / 04</span>
+        <div class="ticks"><span class="tick"><i></i></span><span class="tick"><i></i></span><span class="tick"><i></i></span><span class="tick"><i></i></span></div>
+        <div class="track"><div class="fill" id="fill"></div></div>
+        <span id="hudname">L'ora del gelato</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="after flav" id="gusti">
+    <div class="flav-head">
+      <h3 class="split"><span class="line"><span>Il gusto</span></span><span class="line"><span><em>del giorno.</em></span></span></h3>
+      <p>Il menu nasce e cambia in laboratorio. Le disponibilità possono variare ogni giorno.</p>
+    </div>
+    <div class="row r1"><span>Fior di Latte</span><span>Nocciola Vintage</span><span>Pistacchio Siciliano</span><span>Limone di Sorrento</span><span>Crema Barroccino</span><span>Cannolo Siciliano</span></div>
+    <div class="row r2"><span>Mango e Passion Fruit</span><span>Cantucci &amp; Vin Santo</span><span>Stracciatella</span><span>Caramello al Caffè</span><span>Fichi</span><span>Bacio Proibito</span></div>
+  </section>
+
+  <section class="posters" id="collezione">
+    <div class="posters-track">
+      <div class="posters-intro">
+        <div class="kick">Collezione · Barroccino</div>
+        <h3 class="split"><span class="line"><span>Sei gusti,</span></span><span class="line"><span><em>sei manifesti.</em></span></span></h3>
+      </div>
+      <img src="immagini/01-pistacchio-fragola.jpg" alt="Locandina: pistacchio e fragola" />
+      <img src="immagini/02-affogato.jpg" alt="Locandina: affogato" />
+      <img src="immagini/03-mantecato.jpg" alt="Locandina: mantecato ogni giorno" />
+      <img src="immagini/04-ora-del-gelato.jpg" alt="Locandina: l'ora del gelato" />
+      <img src="immagini/05-tiramisu.jpg" alt="Locandina: tiramisù" />
+      <img src="immagini/06-brioche.jpg" alt="Locandina: brioche" />
+    </div>
+  </section>
+
+  <section class="after">
+    <div class="bento">
+      <figure class="tile t1"><img src="assets/product-tiramisu.jpg" alt="Tiramisù" /><b>Tiramisù</b></figure>
+      <figure class="tile t2"><img src="assets/product-brioche.jpg" alt="Brioche" /><b>Brioche</b></figure>
+      <figure class="tile t3"><img src="assets/product-caffe.jpg" alt="Caffè" /><b>Caffè</b></figure>
+      <figure class="tile t4"><img src="assets/product-crepe.jpg" alt="Crêpes" /><b>Crêpes</b></figure>
+      <figure class="tile t5"><img src="assets/product-torta.jpg" alt="Torte" /><b>Torte</b></figure>
+      <figure class="tile t6"><img src="assets/product-yogurt.jpg" alt="Yogurt" /><b>Yogurt</b></figure>
+    </div>
+  </section>
+
+  <section class="places" id="luoghi">
+    <div class="kick">Firenze · dal 2017</div>
+    <div class="place"><h4 class="split"><span class="line"><span>Novoli</span></span></h4><p>Via della Torre degli Agli 71<br />50127 Firenze</p></div>
+    <div class="place"><h4 class="split"><span class="line"><span><em>Centro</em></span></span></h4><p>Via del Corso 66r<br />Firenze</p></div>
+  </section>
+
+  <section class="final">
+    <h5 class="split"><span class="line"><span>È l'ora</span></span><span class="line"><span><em>del gelato.</em></span></span></h5>
+    <a class="cta" href="#luoghi">Vieni a trovarci <span>→</span></a>
+    <footer><span>© Barroccino</span><span>Prototipo di design</span><span>@barroccinofirenze</span></footer>
+  </section>
+</main>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+const FRAMES = 192;
+const SCENES = ["a", "b", "affogato", "d"];
+const ACCENTS = ["#a8453d", "#8a6a3a", "#7a4a22", "#5d7330"];
+const NAMES = ["L'ora del gelato", "Il laboratorio", "L'affogato", "La stagione"];
+const mobile = () => innerWidth <= 820;
+const base = "frames/";
+
+// ---------- frame loading ----------
+const seq = SCENES.map(() => new Array(FRAMES).fill(null));
+let loadedCount = 0;
+const total = FRAMES * SCENES.length;
+const countEl = document.getElementById("count");
+const barEl = document.getElementById("bar");
+function loadAll() {
+  return Promise.all(SCENES.map((s, si) => Promise.all(Array.from({ length: FRAMES }, (_, i) => new Promise((res) => {
+    const img = new Image();
+    img.decoding = "async";
+    img.onload = () => { seq[si][i] = img; done(); res(); };
+    img.onerror = () => { done(); res(); };
+    img.src = `${base}${s}/${innerWidth <= 820 ? "sm" : "lg"}/f_${String(i + 1).padStart(3, "0")}.webp`;
+  })))));
+}
+function done() {
+  loadedCount++;
+  const p = Math.round((loadedCount / total) * 100);
+  countEl.textContent = String(p).padStart(3, "0");
+  barEl.style.transform = `scaleX(${loadedCount / total})`;
+}
+function frameAt(si, i) {
+  const arr = seq[si];
+  if (arr[i]) return arr[i];
+  for (let d = 1; d < FRAMES; d++) { if (arr[i - d]) return arr[i - d]; if (arr[i + d]) return arr[i + d]; }
+  return null;
+}
+
+// ---------- canvas film ----------
+const canvas = document.getElementById("film-canvas");
+const ctx = canvas.getContext("2d");
+let W = 0, H = 0, DPR = 1;
+function resize() {
+  DPR = Math.min(devicePixelRatio || 1, 2);
+  W = canvas.clientWidth; H = canvas.clientHeight;
+  canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+}
+addEventListener("resize", () => { resize(); ScrollTrigger.refresh(); });
+resize();
+
+// the film always fills the screen; only zoom, frame and scene change
+const card = { t: 0, r: 0, b: 0, l: 0, rad: 0, zoom: 1.22, frame: 0, scene: 0, mix: 0 };
+
+function drawCover(img, x, y, w, h, zoom, alpha) {
+  const s = Math.max(w / img.naturalWidth, h / img.naturalHeight) * zoom;
+  const iw = img.naturalWidth * s, ih = img.naturalHeight * s;
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(img, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih);
+  ctx.globalAlpha = 1;
+}
+function render() {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  const x = (card.l / 100) * W, y = (card.t / 100) * H;
+  const w = W - x - (card.r / 100) * W, h = H - y - (card.b / 100) * H;
+  if (w <= 0 || h <= 0) return;
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, Math.min(card.rad, w / 2, h / 2));
+  ctx.clip();
+  ctx.fillStyle = "#f6efe4";
+  ctx.fillRect(x, y, w, h);
+  const si = Math.min(SCENES.length - 1, Math.floor(card.scene));
+  const img = frameAt(si, Math.round(card.frame));
+  if (img) drawCover(img, x, y, w, h, card.zoom, 1);
+  // cross-dissolve from the previous scene's last frame at each chapter start
+  if (card.mix > 0 && si > 0) { const prev = frameAt(si - 1, FRAMES - 1); if (prev) drawCover(prev, x, y, w, h, card.zoom, card.mix); }
+  ctx.restore();
+}
+gsap.ticker.add(render);
+
+// ---------- film timeline (one continuous scrubbed story) ----------
+const fill = document.getElementById("fill");
+const ticks = [...document.querySelectorAll(".tick i")];
+const hudnum = document.getElementById("hudnum"), hudname = document.getElementById("hudname");
+const framectr = document.getElementById("framectr"), numEl = document.getElementById("num");
+const glow = document.getElementById("glow");
+let currentCh = -1;
+function setChapter(i) {
+  if (i === currentCh) return;
+  currentCh = i;
+  document.documentElement.style.setProperty("--accent", ACCENTS[i]);
+  hudnum.textContent = `0${i + 1} / 04`;
+  hudname.textContent = NAMES[i];
+  numEl.textContent = `0${i + 1}`;
+  document.querySelectorAll(".wash").forEach((w, k) => w.classList.toggle("on", k === i));
+  gsap.set(numEl, mobile() ? { left: "4vw", right: "auto", top: "8vh" } : (i % 2 === 0 ? { left: "2vw", right: "auto", top: "4vh" } : { left: "auto", right: "2vw", top: "4vh" }));
+}
+
+function buildFilm() {
+  const INTRO = 0.6, CH = 2.4; // timeline units
+  const tl = gsap.timeline({
+    defaults: { ease: "none" },
+    scrollTrigger: {
+      trigger: "#film", start: "top top", end: "bottom bottom", scrub: 1,
+      onUpdate: (self) => {
+        const t = tl.time();
+        const ch = Math.max(0, Math.min(3, Math.floor((t - INTRO) / CH)));
+        setChapter(t < INTRO ? 0 : ch);
+        fill.style.transform = `scaleX(${self.progress})`;
+        ticks.forEach((k, i) => { const local = (t - INTRO - i * CH) / CH; k.style.transform = `scaleX(${Math.max(0, Math.min(1, local))})`; });
+        framectr.textContent = `FRAME ${String(Math.round(card.frame) + 1).padStart(3, "0")} / ${FRAMES}  ·  SCENA 0${ch + 1}`;
+      },
+    },
+  });
+
+  // intro: the round window opens up while the big title slides away
+  tl.to(card, { zoom: 1.04, duration: INTRO, ease: "power2.inOut" }, 0)
+    .to("#bigword", { yPercent: -60, opacity: 0, duration: INTRO * .8, ease: "power2.in" }, 0)
+    .to("#hint", { opacity: 0, duration: .2 }, 0);
+
+  const chapters = [...document.querySelectorAll(".chapter, .chapter-side")];
+  for (let i = 0; i < 4; i++) {
+    const s = INTRO + i * CH;
+    if (i > 0) {
+      tl.set(card, { scene: i, frame: 0 }, s)
+        .fromTo(card, { mix: 1 }, { mix: 0, duration: .35 }, s)
+        .fromTo(card, { zoom: 1.12 }, { zoom: 1.04, duration: .55, ease: "power3.out" }, s);
+    }
+    tl.fromTo(card, { frame: 0 }, { frame: FRAMES - 1, duration: CH * .92 }, s);
+    tl.fromTo(card, { zoom: 1.04 }, { zoom: 1, duration: CH }, s);
+
+    const els = chapters.filter((c) => +c.dataset.ch === i);
+    els.forEach((el) => {
+      const lines = el.querySelectorAll(".line > span");
+      const rest = el.querySelectorAll(".kick, p");
+      const pIn = i === 0 ? INTRO * .55 : s + .3;
+      gsap.set(el, { autoAlpha: 1 });
+      if (lines.length) tl.fromTo(lines, { yPercent: 118 }, { yPercent: 0, stagger: .07, duration: .45, ease: "power3.out" }, pIn);
+      tl.fromTo(rest.length ? rest : el, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, stagger: .06, duration: .4, ease: "power2.out" }, pIn + .1);
+      tl.to(el, { autoAlpha: 0, y: -40, filter: "blur(8px)", duration: .3, ease: "power2.in" }, s + CH - .35);
+      if (i < 3) tl.set(el, { y: 0, filter: "blur(0px)" }, s + CH);
+    });
+    tl.fromTo(numEl, { yPercent: 20 }, { yPercent: -20, duration: CH }, s);
+  }
+  return tl;
+}
+
+// ---------- page reveals ----------
+function buildPage() {
+  document.querySelectorAll(".split").forEach((el) => {
+    gsap.fromTo(el.querySelectorAll(".line > span"), { yPercent: 118 }, { yPercent: 0, stagger: .08, duration: 1.2, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 85%" } });
+  });
+  gsap.fromTo(".flav-head p", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1, scrollTrigger: { trigger: ".flav-head", start: "top 80%" } });
+  // flavour rows drift in opposite directions, driven by scroll
+  gsap.fromTo(".r1", { x: "4vw" }, { x: () => -(document.querySelector(".r1").scrollWidth - innerWidth * .6), ease: "none", scrollTrigger: { trigger: "#gusti", start: "top bottom", end: "bottom top", scrub: 1 } });
+  gsap.fromTo(".r2", { x: () => -(document.querySelector(".r2").scrollWidth - innerWidth) }, { x: "4vw", ease: "none", scrollTrigger: { trigger: "#gusti", start: "top bottom", end: "bottom top", scrub: 1 } });
+  // posters: the row slides sideways while the section is pinned
+  const track = document.querySelector(".posters-track");
+  gsap.to(track, { x: () => -(track.scrollWidth - innerWidth), ease: "none",
+    scrollTrigger: { trigger: ".posters", start: "top top", end: () => "+=" + (track.scrollWidth - innerWidth), pin: true, scrub: 1, invalidateOnRefresh: true } });
+  gsap.utils.toArray(".posters-track img").forEach((im, k) => gsap.fromTo(im, { rotate: k % 2 ? 3 : -3, y: 40 }, { rotate: 0, y: 0, ease: "none",
+    scrollTrigger: { trigger: ".posters", start: "top bottom", end: "top top", scrub: 1 } }));
+  document.querySelectorAll(".tile").forEach((t, i) => {
+    const tl = gsap.timeline({ scrollTrigger: { trigger: t, start: "top 92%" } });
+    tl.fromTo(t, { clipPath: "inset(30% 10% 0% 10% round 28px)", y: 60 }, { clipPath: "inset(0% 0% 0% 0% round 28px)", y: 0, duration: 1.3, ease: "expo.out", delay: (i % 3) * .08 })
+      .fromTo(t.querySelector("img"), { scale: 1.3 }, { scale: 1, duration: 1.6, ease: "expo.out" }, 0);
+  });
+  gsap.utils.toArray(".place").forEach((p) => gsap.fromTo(p, { borderBottomColor: "rgba(244,236,223,0)" }, { borderBottomColor: "rgba(244,236,223,.14)", duration: 1.2, scrollTrigger: { trigger: p, start: "top 85%" } }));
+}
+
+// ---------- start ----------
+gsap.set(".chapter, .chapter-side", { autoAlpha: 0 });
+gsap.set("#bigword .line > span", { yPercent: 118 });
+loadAll().then(() => {
+  setChapter(0);
+  buildFilm();
+  buildPage();
+  const tl = gsap.timeline();
+  tl.to("#count", { yPercent: -40, opacity: 0, duration: .6, ease: "power2.in" })
+    .to("#loader", { clipPath: "inset(0 0 100% 0)", duration: 1.1, ease: "expo.inOut" }, "-=.1")
+    .to("#bigword .line > span", { yPercent: 0, duration: 1.4, ease: "expo.out" }, "-=.5")
+    .fromTo(card, { zoom: 1.4 }, { zoom: 1.22, duration: 1.8, ease: "expo.out", immediateRender: false }, "<")
+    .set("#loader", { display: "none" })
+    .add(() => { window.__ready = true; });
+  ScrollTrigger.refresh();
+});
+</script>
+</body>
+</html>
